@@ -376,5 +376,11 @@
       <artifactId>wdtk-dumpfiles</artifactId>
       <version>0.10.0</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-analyzers-kuromoji -->
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-kuromoji</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
   </dependencies>
 </project>
