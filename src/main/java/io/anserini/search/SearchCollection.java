@@ -43,6 +43,7 @@ import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.ar.ArabicAnalyzer;
 import org.apache.lucene.analysis.bn.BengaliAnalyzer;
 import org.apache.lucene.analysis.cjk.CJKAnalyzer;
+import org.apache.lucene.analysis.ja.JapaneseAnalyzer;
 import org.apache.lucene.analysis.fr.FrenchAnalyzer;
 import org.apache.lucene.analysis.hi.HindiAnalyzer;
 import org.apache.lucene.analysis.de.GermanAnalyzer;
@@ -238,6 +239,8 @@ public final class SearchCollection implements Closeable {
       analyzer = new GermanAnalyzer();
     } else if (args.language.equals("es")) {
       analyzer = new SpanishAnalyzer();
+    } else if (args.language.equals("ja")) {
+      analyzer = new JapaneseAnalyzer();
     } else {
       // Default to English
       analyzer = args.keepstop ?
