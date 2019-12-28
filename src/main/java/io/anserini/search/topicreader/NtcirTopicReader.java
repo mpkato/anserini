@@ -32,19 +32,19 @@ import java.util.TreeMap;
  * http://research.nii.ac.jp/ntcir/workshop/OnlineProceedings13/pdf/ntcir/01-NTCIR13-OV-WWW-LuoC.pdf
  * http://research.nii.ac.jp/ntcir/workshop/OnlineProceedings14/pdf/ntcir/01-NTCIR14-OV-WWW-MaoJ.pdf
  */
-public class NtcirTopicReader extends TopicReader<Integer> {
+public class NtcirTopicReader extends TopicReader<String> {
   public NtcirTopicReader(Path topicFile) {
     super(topicFile);
   }
 
   @Override
-  public SortedMap<Integer, Map<String, String>> read(BufferedReader bRdr) throws IOException {
+  public SortedMap<String, Map<String, String>> read(BufferedReader bRdr) throws IOException {
     /**
      * There are no narratives in NTCIR WWW topics, so this method returns
      * a map whose keys are description and title only.
      */
 
-    SortedMap<Integer, Map<String, String>> map = new TreeMap<>();
+    SortedMap<String, Map<String, String>> map = new TreeMap<>();
     Map<String, String> fields = new HashMap<>();
 
     String number = "";
@@ -68,7 +68,7 @@ public class NtcirTopicReader extends TopicReader<Integer> {
       }
 
       if (line.startsWith("</query>")) {
-        map.put(Integer.valueOf(number), fields);
+        map.put(number, fields);
         fields = new HashMap<>();
       }
     }
