@@ -23,6 +23,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.List;
+
+import org.attoparser.ParseException;
+import org.attoparser.config.ParseConfiguration;
+import org.attoparser.dom.DOMMarkupParser;
+import org.attoparser.dom.Document;
+import org.attoparser.dom.Element;
+import org.attoparser.dom.IDOMMarkupParser;
+import org.attoparser.dom.Text;
 
 /**
  * Topic reader for the XML format used in the NTCIR We Want Web (WWW) Tracks.
@@ -32,7 +41,7 @@ import java.util.TreeMap;
  * http://research.nii.ac.jp/ntcir/workshop/OnlineProceedings13/pdf/ntcir/01-NTCIR13-OV-WWW-LuoC.pdf
  * http://research.nii.ac.jp/ntcir/workshop/OnlineProceedings14/pdf/ntcir/01-NTCIR14-OV-WWW-MaoJ.pdf
  */
-public class NtcirTopicReader extends TopicReader<String> {
+public class NtcirTopicReader extends XmlReader<String> {
   public NtcirTopicReader(Path topicFile) {
     super(topicFile);
   }
@@ -42,36 +51,39 @@ public class NtcirTopicReader extends TopicReader<String> {
     /**
      * There are no narratives in NTCIR WWW topics, so this method returns
      * a map whose keys are description and title only.
+     *
+     * Example:
+     * <queries>
+     *   <query>
+     *     <qid>0001</qid>
+     *     <content>Halloween picture</content>
+     *     <description>Halloween is coming. ...</description>
+     *   </query>
+     * </queries>
      */
 
     SortedMap<String, Map<String, String>> map = new TreeMap<>();
-    Map<String, String> fields = new HashMap<>();
 
-    String number = "";
-    String query = "";
-    String description = "";
-    String line;
-
-    while ((line = bRdr.readLine()) != null) {
-      line = line.trim();
-      if (line.startsWith("<qid")) {
-        number = line.substring(5, line.length() - 6).trim();
+    String doc = loadFile(bRdr);
+    IDOMMarkupParser parser = new DOMMarkupParser(ParseConfiguration.htmlConfiguration());
+    try {
+      Document document = parser.parse(doc);
+      Element queriesNode = document.getFirstChildOfType(Element.class);
+      List<Element> queryNodes = queriesNode.getChildrenOfType(Element.class);
+      for (Element queryNode: queryNodes) {
+        Map<String, String> fields = new HashMap<>();
+        Map<String, String> rawFields = extractFields(queryNode);
+        fields.put("title", rawFields.get("content"));
+        fields.put("description", rawFields.get("description"));
+        if (rawFields.containsKey("qid")) {
+          map.put(rawFields.get("qid"), fields);
+        }
       }
-      if (line.startsWith("<content>") && line.endsWith("</content>")) {
-        query = line.substring(9, line.length() - 10).trim();
-        fields.put("title", query);
-      }
-
-      if (line.startsWith("<description>") && line.endsWith("</description>")) {
-        description = line.substring(13, line.length() - 14).trim();
-        fields.put("description", description);
-      }
-
-      if (line.startsWith("</query>")) {
-        map.put(number, fields);
-        fields = new HashMap<>();
-      }
+    } catch (ParseException e) {
+      System.out.print(e);
     }
+
     return map;
   }
+
 }
