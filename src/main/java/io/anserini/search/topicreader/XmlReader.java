@@ -26,22 +26,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.List;
 
-import org.attoparser.IMarkupHandler;
-import org.attoparser.IMarkupParser;
-import org.attoparser.MarkupParser;
-import org.attoparser.ParseException;
-import org.attoparser.config.ParseConfiguration;
-import org.attoparser.discard.DiscardMarkupHandler;
-import org.attoparser.dom.DOMMarkupParser;
-import org.attoparser.dom.DOMWriter;
-import org.attoparser.dom.DocType;
-import org.attoparser.dom.Document;
 import org.attoparser.dom.Element;
-import org.attoparser.dom.IDOMMarkupParser;
-import org.attoparser.dom.INode;
 import org.attoparser.dom.Text;
-import org.attoparser.output.OutputMarkupHandler;
-import org.attoparser.select.BlockSelectorMarkupHandler;
 
 /**
  * Topic reader for the XML format.
