@@ -23,48 +23,46 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.List;
+
+import org.attoparser.ParseException;
+import org.attoparser.config.ParseConfiguration;
+import org.attoparser.dom.DOMMarkupParser;
+import org.attoparser.dom.Document;
+import org.attoparser.dom.Element;
+import org.attoparser.dom.IDOMMarkupParser;
+import org.attoparser.dom.Text;
 
 /**
  * Topic reader for standard XML format used in the TREC Web Tracks.
  */
-public class WebxmlTopicReader extends TopicReader<Integer> {
+public class WebxmlTopicReader extends XmlReader<Integer> {
   public WebxmlTopicReader(Path topicFile) {
     super(topicFile);
-  }
-
-  private String extract(String line, String tag) {
-    int i = line.indexOf(tag);
-    if (i == -1) throw new IllegalArgumentException("line does not contain the tag : " + tag);
-    int j = line.indexOf("\"", i + tag.length() + 2);
-    if (j == -1) throw new IllegalArgumentException("line does not contain quotation");
-    return line.substring(i + tag.length() + 2, j);
   }
 
   @Override
   public SortedMap<Integer, Map<String, String>> read(BufferedReader bRdr) throws IOException {
     SortedMap<Integer, Map<String, String>> map = new TreeMap<>();
-    Map<String,String> fields = new HashMap<>();
 
-    String number = "";
-    String query = "";
-
-    String line;
-
-    while ((line = bRdr.readLine()) != null) {
-      line = line.trim();
-      if (line.startsWith("<topic")) {
-        number = extract(line, "number");
-      }
-      if (line.startsWith("<query>") && line.endsWith("</query>")) {
-        query = line.substring(7, line.length() - 8).trim();
-        fields.put("title", query);
-      }
-      if (line.startsWith("</topic>")) {
+    String doc = loadFile(bRdr);
+    IDOMMarkupParser parser = new DOMMarkupParser(ParseConfiguration.htmlConfiguration());
+    try {
+      Document document = parser.parse(doc);
+      Element queriesNode = document.getFirstChildOfType(Element.class);
+      List<Element> queryNodes = queriesNode.getChildrenOfType(Element.class);
+      for (Element queryNode: queryNodes) {
+        Map<String, String> fields = new HashMap<>();
+        String number = queryNode.getAttributeValue("number");
+        Map<String, String> rawFields = extractFields(queryNode);
+        fields.put("title", rawFields.get("query"));
         map.put(Integer.valueOf(number), fields);
-        fields = new HashMap<>();
       }
+    } catch (ParseException e) {
+      System.out.print(e);
     }
 
     return map;
   }
+
 }
