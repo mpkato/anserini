@@ -41,7 +41,7 @@ import org.attoparser.dom.Text;
  * http://research.nii.ac.jp/ntcir/workshop/OnlineProceedings13/pdf/ntcir/01-NTCIR13-OV-WWW-LuoC.pdf
  * http://research.nii.ac.jp/ntcir/workshop/OnlineProceedings14/pdf/ntcir/01-NTCIR14-OV-WWW-MaoJ.pdf
  */
-public class NtcirTopicReader extends XmlReader<String> {
+public class NtcirTopicReader extends XmlTopicReader<String> {
   public NtcirTopicReader(Path topicFile) {
     super(topicFile);
   }

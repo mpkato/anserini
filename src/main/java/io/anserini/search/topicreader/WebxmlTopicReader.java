@@ -36,7 +36,7 @@ import org.attoparser.dom.Text;
 /**
  * Topic reader for standard XML format used in the TREC Web Tracks.
  */
-public class WebxmlTopicReader extends XmlReader<Integer> {
+public class WebxmlTopicReader extends XmlTopicReader<Integer> {
   public WebxmlTopicReader(Path topicFile) {
     super(topicFile);
   }

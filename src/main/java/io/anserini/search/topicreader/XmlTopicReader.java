@@ -32,8 +32,8 @@ import org.attoparser.dom.Text;
 /**
  * Topic reader for the XML format.
  */
-public abstract class XmlReader<T> extends TopicReader<T> {
-  public XmlReader(Path topicFile) {
+public abstract class XmlTopicReader<T> extends TopicReader<T> {
+  public XmlTopicReader(Path topicFile) {
     super(topicFile);
   }
 
