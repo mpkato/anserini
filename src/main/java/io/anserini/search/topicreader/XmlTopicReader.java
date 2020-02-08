@@ -26,8 +26,19 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.List;
 
-import org.attoparser.dom.Element;
-import org.attoparser.dom.Text;
+import java.nio.file.Paths;
+import java.io.InputStream;
+ 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * Topic reader for the XML format.
@@ -37,24 +48,23 @@ public abstract class XmlTopicReader<T> extends TopicReader<T> {
     super(topicFile);
   }
 
-  String loadFile(BufferedReader bRdr) {
+  Document loadFile(BufferedReader bRdr) {
     /**
-     * Read String from BufferedReader
+     * Read Document from BufferedReader
      */
+    Document document = null;
     try {
-      StringBuilder builder = new StringBuilder();
-
-      int c;
-      while ((c = bRdr.read()) != -1) {
-        builder.append((char) c);
-      }
-
-      String doc = builder.toString();
-
-      return doc;
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      document = builder.parse(new InputSource(bRdr));
     } catch (IOException e) {
       throw new UncheckedIOException(e);
-    }
+    } catch (ParserConfigurationException e) {
+      e.printStackTrace();
+    } catch (SAXException e) {
+      e.printStackTrace();
+    } 
+    return document;
   }
 
   Map<String, String> extractFields(Element element) {
@@ -62,11 +72,14 @@ public abstract class XmlTopicReader<T> extends TopicReader<T> {
      * Extract elements in an element
      */
     Map<String, String> fields = new HashMap<>();
-    List<Element> children = element.getChildrenOfType(Element.class);
-    for (Element child: children) {
-      String name = child.getElementName();
-      Text text = child.getFirstChildOfType(Text.class);
-      String content = text.getContent().trim();
+    NodeList children = element.getChildNodes();
+    for (int i = 0; i < children.getLength(); i++) {
+      Node childNode = children.item(i);
+      if (childNode.getNodeType() != Node.ELEMENT_NODE)
+        continue;
+      Element child = (Element) childNode;
+      String name = child.getTagName();
+      String content = child.getTextContent().trim();
       fields.put(name, content);
     }
     return fields;

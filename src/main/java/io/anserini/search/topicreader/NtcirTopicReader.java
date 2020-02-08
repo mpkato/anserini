@@ -23,15 +23,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.List;
 
-import org.attoparser.ParseException;
-import org.attoparser.config.ParseConfiguration;
-import org.attoparser.dom.DOMMarkupParser;
-import org.attoparser.dom.Document;
-import org.attoparser.dom.Element;
-import org.attoparser.dom.IDOMMarkupParser;
-import org.attoparser.dom.Text;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
 
 /**
  * Topic reader for the XML format used in the NTCIR We Want Web (WWW) Tracks.
@@ -64,23 +60,22 @@ public class NtcirTopicReader extends XmlTopicReader<String> {
 
     SortedMap<String, Map<String, String>> map = new TreeMap<>();
 
-    String doc = loadFile(bRdr);
-    IDOMMarkupParser parser = new DOMMarkupParser(ParseConfiguration.htmlConfiguration());
-    try {
-      Document document = parser.parse(doc);
-      Element queriesNode = document.getFirstChildOfType(Element.class);
-      List<Element> queryNodes = queriesNode.getChildrenOfType(Element.class);
-      for (Element queryNode: queryNodes) {
-        Map<String, String> fields = new HashMap<>();
-        Map<String, String> rawFields = extractFields(queryNode);
-        fields.put("title", rawFields.get("content"));
-        fields.put("description", rawFields.get("description"));
-        if (rawFields.containsKey("qid")) {
-          map.put(rawFields.get("qid"), fields);
-        }
+    Document document = loadFile(bRdr);
+    Element root = document.getDocumentElement();
+    NodeList queryNodeList = root.getChildNodes();
+    for (int i = 0; i < queryNodeList.getLength(); i++) {
+      Node queryNode = queryNodeList.item(i);
+      if (queryNode.getNodeType() != Node.ELEMENT_NODE)
+        continue;
+      Element query = (Element) queryNode;
+      Map<String, String> fields = new HashMap<>();
+      Map<String, String> rawFields = extractFields(query);
+      fields.put("title", rawFields.get("query"));
+      fields.put("title", rawFields.get("content"));
+      fields.put("description", rawFields.get("description"));
+      if (rawFields.containsKey("qid")) {
+        map.put(rawFields.get("qid"), fields);
       }
-    } catch (ParseException e) {
-      System.out.print(e);
     }
 
     return map;

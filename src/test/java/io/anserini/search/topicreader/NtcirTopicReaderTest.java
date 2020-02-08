@@ -62,7 +62,7 @@ public class NtcirTopicReaderTest {
 
     assertEquals("0080", topics.lastKey());
     assertEquals("www.gardenburger.com", topics.get(topics.lastKey()).get("title"));
-    assertEquals("You want to find the website &quot;www.gardenburger.com&quot;",
+    assertEquals("You want to find the website \"www.gardenburger.com\"",
         topics.get(topics.lastKey()).get("description"));
 
   }

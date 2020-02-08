@@ -23,15 +23,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.List;
 
-import org.attoparser.ParseException;
-import org.attoparser.config.ParseConfiguration;
-import org.attoparser.dom.DOMMarkupParser;
-import org.attoparser.dom.Document;
-import org.attoparser.dom.Element;
-import org.attoparser.dom.IDOMMarkupParser;
-import org.attoparser.dom.Text;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
 
 /**
  * Topic reader for standard XML format used in the TREC Web Tracks.
@@ -45,23 +41,20 @@ public class WebxmlTopicReader extends XmlTopicReader<Integer> {
   public SortedMap<Integer, Map<String, String>> read(BufferedReader bRdr) throws IOException {
     SortedMap<Integer, Map<String, String>> map = new TreeMap<>();
 
-    String doc = loadFile(bRdr);
-    IDOMMarkupParser parser = new DOMMarkupParser(ParseConfiguration.htmlConfiguration());
-    try {
-      Document document = parser.parse(doc);
-      Element queriesNode = document.getFirstChildOfType(Element.class);
-      List<Element> queryNodes = queriesNode.getChildrenOfType(Element.class);
-      for (Element queryNode: queryNodes) {
-        Map<String, String> fields = new HashMap<>();
-        String number = queryNode.getAttributeValue("number");
-        Map<String, String> rawFields = extractFields(queryNode);
-        fields.put("title", rawFields.get("query"));
-        map.put(Integer.valueOf(number), fields);
-      }
-    } catch (ParseException e) {
-      System.out.print(e);
+    Document document = loadFile(bRdr);
+    Element root = document.getDocumentElement();
+    NodeList queryNodeList = root.getChildNodes();
+    for (int i = 0; i < queryNodeList.getLength(); i++) {
+      Node queryNode = queryNodeList.item(i);
+      if (queryNode.getNodeType() != Node.ELEMENT_NODE)
+        continue;
+      Element query = (Element) queryNode;
+      Map<String, String> fields = new HashMap<>();
+      String number = query.getAttribute("number");
+      Map<String, String> rawFields = extractFields(query);
+      fields.put("title", rawFields.get("query"));
+      map.put(Integer.valueOf(number), fields);
     }
-
     return map;
   }
 
